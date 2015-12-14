@@ -11,6 +11,22 @@ input {
   border: 0;
 }
 
+.card.actions {
+  @include background-border();
+  @include padding(.8em 2em);
+}
+
+.card.actions.fill {
+  background-color: #F5F5F5;
+  border-bottom: 1px solid #D8D8D8;
+  margin-top: 0;
+
+  .poll-status {
+    color: #D8D8D8;
+    margin-left: 1rem;
+  }
+}
+
 .btn {
   @include border-color($primary-color);
   @include padding(6px 10px);
@@ -63,6 +79,11 @@ input {
     }
   }
 
+  &.submitBtn {
+    color: black;
+    width: auto !important;
+  }
+
   &:focus {
     outline: none;
   }
@@ -70,4 +91,16 @@ input {
   &:disabled {
     cursor: not-allowed;
   }
+}
+
+.error {
+  border-color: hsla(46, 23%, 47%, .9) !important;
+  @include placeholder {
+    color: transparentize($error-color, .5);
+  }
+}
+
+#recover-poll {
+  color: black;
+  text-decoration: none;
 }

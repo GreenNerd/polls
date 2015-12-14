@@ -14,24 +14,35 @@ class App.Views.Question extends Backbone.View
     'click .js-remove-question': 'removeQuestion'
     'click .js-toggle-question': 'toggleQuestion'
 
-  render: () ->
-    @listenTo(@model, 'remove', @remove)
+  render: (method) ->
+    @method = method
+    @$el.html @template(method).call(@, @model.attributes)
 
-    @$el.html @template(@model.attributes)
-
-    @$title = @$('.input')
-    @$title.change () =>
-      @model.set title: @$title.val().trim()
+    if 'edit' == method
+      @listenTo(@model, 'remove', @remove)
+      @$title = @$('.input')
+      @$title.change () =>
+        @model.set title: @$title.val().trim()
+      @$title.blur () =>
+        @model.isValid()
+      @model.validate = @_validate
+    else if 'fill' == method
+      @$el.addClass 'fill'
+    else if 'show' == method
+      @$el.addClass 'show'
 
     @$el.append @choicesView().el
 
     @$choicesBody = @$('.choices')
+
 
     @
 
   choicesView: () ->
     new App.Views.Choices
       collection: @model.get('choices')
+      parent: @model
+      method: @method
 
   initMultiple: () ->
     Polls.initiCheck @$('.multiple input')
@@ -61,3 +72,15 @@ class App.Views.Question extends Backbone.View
     @$('.js-toggle-question').toggleClass('fa-angle-up')
     @$('.js-toggle-question').toggleClass('fa-angle-down')
 
+  # Private
+
+  _validate: (attrs, options) =>
+    options.complete?()
+
+    if !attrs.title.trim()
+      @$el.addClass('error').children('.title').children('input').addClass('error')
+      return 'error'
+    else
+      if !@$el.children('.error').length
+        @$el.removeClass('error').children('.title').children('input').removeClass('error')
+        return undefined

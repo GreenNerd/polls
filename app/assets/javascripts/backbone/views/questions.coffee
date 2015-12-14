@@ -7,24 +7,39 @@ class App.Views.Questions extends Backbone.View
   events:
     'click .js-add-question': 'addQuestion'
 
-  initialize: () ->
-    @render()
+  initialize: (options) ->
+    @parent = options.parent if options.parent
 
-  render: () ->
-    @listenTo(@collection, 'add', @add)
+    if options.method then @render(options.method) else @render('edit')
 
-    @$el.html @template()
+  render: (method) ->
+    @method = method
 
-    @$addQuestionBtn = @$('.js-add-question')
+    @$el.html @template(method)
+
+    if 'edit' == method
+      @listenTo(@collection, 'add', @add)
+      @$addQuestionBtn = @$('.js-add-question')
+    else if 'fill' == method
+      @$el.addClass 'fill'
+    else if 'show' == method
+      @$el.addClass 'show'
 
     @collection.each (question) =>
       @add(question)
 
   add: (question) ->
     questionView = new App.Views.Question model: question
-    @$addQuestionBtn.before(questionView.render().el)
+    if 'edit' == @method
+      @$addQuestionBtn.before(questionView.render('edit').el)
+    else
+      @$el.append(questionView.render(@method).el)
+
     # iCheck after render on dom
-    questionView.initMultiple()
+    if poll_form.questionsRendered
+      questionView.initMultiple()
+    else
+      Backbone.on('render:complete', questionView.initMultiple, questionView)
 
   remove: (question) ->
     @collection.remove(question)
@@ -34,6 +49,9 @@ class App.Views.Questions extends Backbone.View
   addQuestion: (e) ->
     e.stopPropagation()
 
-    @collection.push new App.Models.Question
-      choices: new App.Models.Choice
+    choice = new App.Models.Choice
+    question = new App.Models.Question choices: choice
 
+    @collection.push question
+
+    @parent.subModels.push question

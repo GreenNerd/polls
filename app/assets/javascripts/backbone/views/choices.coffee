@@ -6,26 +6,46 @@ class App.Views.Choices extends Backbone.View
   events:
     'click .js-add-choice': 'addChoice'
 
-  initialize: () ->
-    @render()
+  initialize: (options) ->
+    @parent = options.parent if options.parent
 
-  render: () ->
-    @listenTo(@collection, 'add', @add)
+    if options.method then @render(options.method) else @render('edit')
 
-    @$el.html @template()
+  render: (method) ->
+    @method = method
 
-    @$actions  = @$('.actions')
+    @$el.html @template(method)
+
+    if 'edit' == method
+      @listenTo(@collection, 'add', @add)
+      @$actions = @$('.actions')
+    else if 'fill' == method
+      @$el.addClass 'fill'
+    else if 'show' == method
+      @$el.addClass 'show'
 
     @collection.each (choice) =>
       @add(choice)
 
   add: (choice) ->
-    choiceView = new App.Views.Choice  model: choice
-    @$actions.before(choiceView.render().el)
+    choiceView = new App.Views.Choice
+      model: choice
+      multiple: @parent.get('multiple')
+      questionId: @parent.get('id')
+    if 'edit' == @method
+      @$actions.before(choiceView.render(@method).el)
+    else if 'fill' == @method
+      @$el.append(choiceView.render(@method).el)
+      Backbone.on 'render:complete', choiceView.initiCheck, choiceView
+    else if 'show' == @method
+      @$el.append(choiceView.render(@method).el)
 
   # Events
   addChoice: (e) ->
     e.stopPropagation()
 
-    @collection.push new App.Models.Choice
+    choice = new App.Models.Choice
 
+    @collection.push choice
+
+    @parent.subModels.push choice

@@ -5,9 +5,21 @@
     @include fill-parent();
     @include row(table);
 
-    .btn {
+    .poll-status {
+      float: left;
       padding: .8rem 0;
-      @include span-columns(6);
+      text-align: left;
+      @include span-columns(3);
+
+      .fa-frown-o {
+        color: $error-color;
+      }
+    }
+
+    .btn {
+      float: right;
+      padding: .8rem 0;
+      @include span-columns(3);
     }
   }
 }
@@ -25,5 +37,31 @@
     font-size: 1.5rem;
     font-weight: bold;
     text-align: center;
+  }
+
+  & > .description {
+    margin: 0;
+    padding: 0 2em;
+  }
+}
+
+.poll.fill,
+.poll.show {
+  background-color: white;
+}
+
+.poll.show {
+  .action {
+    background-color: #F5F5F5;
+    display: table;
+    padding: 1rem 2rem;
+    width: 100%;
+  }
+
+  .collapseBtn {
+    color: black;
+    display: table-cell;
+    float: right;
+    text-decoration: none;
   }
 }

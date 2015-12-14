@@ -1,6 +1,6 @@
 class PollsController < ApplicationController
   before_action :sign_in_required
-  before_action :find_poll, only: [:show, :destroy, :update]
+  before_action :find_poll, only: [:show, :destroy, :update, :fill]
 
   def new
     @poll = current_user.polls.new
@@ -29,6 +29,20 @@ class PollsController < ApplicationController
   def destroy
     @poll.destroy
     head :no_content
+  end
+
+  def fill
+  end
+
+  def submit
+    params[:choice_ids].each do |choice_id|
+      Choice.find(choice_id).submit current_user
+    end
+    head :no_content
+  end
+
+  def avatar
+    render plain: User.find(params[:user_id]).headimgurl
   end
 
   private
